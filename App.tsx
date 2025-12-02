@@ -11,35 +11,26 @@ import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createStaticNavigation } from '@react-navigation/native';
+import HomeScreen from './src/screens/HomeScreen.jsx';
+import Schedules from './src/screens/Schedules.jsx';
+import Journal from './src/screens/Journal.jsx';
+import Profile from './src/screens/Profile.jsx';
+
+const RootStack = createNativeStackNavigator({
+  screens:{
+    Home: HomeScreen,
+    Schedules: Schedules,
+    Journal: Journal,
+    Profile: Profile
+  }
+});
+
+const Navigation = createStaticNavigation(RootStack);
 
 function App() {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  return (
-    <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
-    </SafeAreaProvider>
-  );
+  return <Navigation />;
 }
-
-function AppContent() {
-  const safeAreaInsets = useSafeAreaInsets();
-
-  return (
-    <View style={styles.container}>
-      <NewAppScreen
-        templateFileName="App.tsx"
-        safeAreaInsets={safeAreaInsets}
-      />
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
 
 export default App;
