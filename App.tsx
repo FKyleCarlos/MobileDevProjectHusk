@@ -6,7 +6,7 @@
  */
 
 import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
+import { StatusBar, StyleSheet, Text, useColorScheme, View } from 'react-native';
 import {
   SafeAreaProvider,
   useSafeAreaInsets,
@@ -27,11 +27,14 @@ function AppContent() {
   const safeAreaInsets = useSafeAreaInsets();
 
   return (
-    <View style={styles.container}>
-      <NewAppScreen
-        templateFileName="App.tsx"
-        safeAreaInsets={safeAreaInsets}
-      />
+    <View className="flex-1 justify-center items-center bg-white">
+      <Text className="text-blue-500 text-xl">Hello, Nativewind!</Text>
+      <Text className='text-blue-200 text-lg p-100 mt-100'>BLUE</Text>
+      <Text className='text-black text-6xl'>BLACK</Text>
+      <Text className="text-red-500 text-xl" style={{ color: 'red' }}>
+        This should show red
+      </Text>
+      <Text className=''></Text>
     </View>
   );
 }
