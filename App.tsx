@@ -32,10 +32,10 @@ function App() {
           },
         }}
       >
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="Classes & Assignments" component={ScheduleScreen} />
-        <Stack.Screen name="Journal" component={JournalScreen} />
-        <Stack.Screen name="Profile" component={ProfileScreen} />
+        <Stack.Screen name="Day2Day" component={HomeScreen} options={{ headerShown: false }}/>
+        <Stack.Screen name="Classes & Assignments" component={ScheduleScreen} options={{ headerShown: false }}/>
+        <Stack.Screen name="Journal" component={JournalScreen} options={{ headerShown: false }}/>
+        <Stack.Screen name="Profile" component={ProfileScreen} options={{ headerShown: false }}/>
       </Stack.Navigator>
     </NavigationContainer>
 
