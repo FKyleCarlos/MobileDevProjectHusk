@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { SafeAreaView, Text, TouchableOpacity, View, StyleSheet, ScrollView } from 'react-native';
+import { SafeAreaView, Text, TouchableOpacity, View, StyleSheet, ScrollView, Image, Link } from 'react-native';
 import MainLayout from '../layouts/MainLayout';
 import NavBar from '../components/NavBar';
 import CalendarButton from '../components/CalendarContainers';
+import addIcon from '../assets/miscIcons/add.png'
 
 export default function ScheduleScreen({ navigation }) {
   const [selectedTab, setSelectedTab] = useState('classes');
@@ -12,7 +13,7 @@ export default function ScheduleScreen({ navigation }) {
 
   const times = [
     '8 AM', '9 AM', '10 AM', '11 AM', '12 PM', '1 PM', '2 PM',
-    '3 PM', '4 PM', '6 PM', '7 PM', '8 PM', '9 PM', '10 PM', '11 PM', '12 AM'
+    '3 PM', '4 PM', '6 PM', '7 PM', '8 PM', '9 PM', '10 PM', '11 PM'
   ];
 
   const months = [
@@ -101,7 +102,19 @@ export default function ScheduleScreen({ navigation }) {
         </ScrollView>
       </View>
       
-      {selectedTab === 'classes' &&
+
+      {selectedTab === 'classes' ?
+      <ScrollView style={styles.scheduleContainer}>
+        {times.map((time, index) => (
+          <View key={index} style={styles.timeSlotContainer}>
+            <View style={styles.timeRow}>
+              <Text style={styles.timeText}>{time}</Text>
+            </View>
+            <View style={styles.separator} />
+          </View>
+        ))}
+      </ScrollView>
+      :
       <ScrollView style={styles.scheduleContainer}>
         {times.map((time, index) => (
           <View key={index} style={styles.timeSlotContainer}>
@@ -113,8 +126,11 @@ export default function ScheduleScreen({ navigation }) {
         ))}
       </ScrollView>
       }
-      
-
+        <TouchableOpacity onPress={() => {selectedTab === 'classes' 
+          ? navigation.navigate('Add Schedule') 
+          : navigation.navigate('Add Deadline')}}>
+          <Image source={addIcon} style={styles.fabClass} />
+        </TouchableOpacity>
       <NavBar navigation={navigation} />
     </MainLayout>
   );
@@ -221,24 +237,19 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginTop: 5,
   },
-  fab: {
+  fabClass: {
     position: 'absolute',
-    bottom: 30,
+    bottom: 120,
     right: 30,
     width: 60,
     height: 60,
-    backgroundColor: '#007bff',
-    borderRadius: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    elevation: 10,
   },
-  fabText: {
-    fontSize: 30,
-    color: '#fff',
+  fabAssignment: {
+    position: 'absolute',
+    bottom: 20,
+    right: 30,
+    width: 60,
+    height: 60,
   },
   dropdown: {
     position: 'absolute',
