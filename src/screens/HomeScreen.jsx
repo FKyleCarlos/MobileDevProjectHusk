@@ -1,4 +1,4 @@
-import { SafeAreaView, Button, View } from 'react-native';
+import { SafeAreaView, Button, View, StyleSheet } from 'react-native';
 import { useState } from "react";
 import MainLayout from '../layouts/MainLayout';
 import NavBar from '../components/NavBar';
