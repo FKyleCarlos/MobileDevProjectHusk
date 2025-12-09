@@ -87,6 +87,25 @@ export default function HomeScreen({ navigation, route }) {
           </View>
         </View>
 
+        <TouchableOpacity
+          onPress={async () => {
+            await AsyncStorage.setItem("testKey", "Hello World");
+            alert("Saved!");
+          }}
+          style={{ padding: 20, backgroundColor: "green" }}
+        >
+          <Text style={{ color: "#fff" }}>Save Test</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={async () => {
+            const value = await AsyncStorage.getItem("testKey");
+            alert("Loaded: " + value);
+          }}
+          style={{ padding: 20, backgroundColor: "blue", marginTop: 10 }}
+        >
+          <Text style={{ color: "#fff" }}>Load Test</Text>
+        </TouchableOpacity>
+
         {/* TOP CARDS */}
         <View style={styles.cardContainer}>
           <View style={[styles.card, styles.cardAssignments, { width: cardWidth }]}>
