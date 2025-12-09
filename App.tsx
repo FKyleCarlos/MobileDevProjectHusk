@@ -35,6 +35,8 @@ function App() {
           },
         }}
       >
+        <Stack.Screen name="Signup" component={SignupScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Day2Day" component={HomeScreen} options={{ headerShown: false }}/>
         <Stack.Screen name="Classes & Assignments" component={ScheduleScreen} options={{ headerShown: false }}/>
         <Stack.Screen name="Journal" component={JournalScreen} options={{ headerShown: false }}/>
