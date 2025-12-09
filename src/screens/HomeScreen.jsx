@@ -11,6 +11,7 @@ import {
 import MainLayout from "../layouts/MainLayout";
 import NavBar from "../components/NavBar";
 import { dummySchedules, dummyAssignments } from "../data/dummyData";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // PNG icons (update the path if needed)
 import InstagramIcon from "../assets/socialIcons/instagram.png";
@@ -102,6 +103,25 @@ export default function HomeScreen({ navigation, route }) {
           </TouchableOpacity>
 
         </View>
+
+        <TouchableOpacity
+          onPress={async () => {
+            await AsyncStorage.setItem("testKey", "Hello World");
+            alert("Saved!");
+          }}
+          style={{ padding: 20, backgroundColor: "green" }}
+        >
+          <Text style={{ color: "#fff" }}>Save Test</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={async () => {
+            const value = await AsyncStorage.getItem("testKey");
+            alert("Loaded: " + value);
+          }}
+          style={{ padding: 20, backgroundColor: "blue", marginTop: 10 }}
+        >
+          <Text style={{ color: "#fff" }}>Load Test</Text>
+        </TouchableOpacity>
 
         {/* TOP CARDS */}
         <View style={styles.cardContainer}>
