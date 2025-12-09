@@ -11,12 +11,12 @@ import {
 import MainLayout from "../layouts/MainLayout";
 import NavBar from "../components/NavBar";
 import { dummySchedules, dummyAssignments } from "../data/dummyData";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // PNG icons (update the path if needed)
 import InstagramIcon from "../assets/socialIcons/instagram.png";
 import FacebookIcon from "../assets/socialIcons/facebook.png";
 import TwitterIcon from "../assets/socialIcons/twitter.png";
-import BurgerIcon from "../assets/miscIcons/burger-bar.png";
 
 
 export default function HomeScreen({ navigation, route }) {
@@ -85,22 +85,6 @@ export default function HomeScreen({ navigation, route }) {
             <Text style={styles.greetingSmall}>Good morning,</Text>
             <Text style={styles.greetingName}>{user.name}!</Text>
           </View>
-
-          <TouchableOpacity
-            style={{ padding: 5 }}
-            onPress={() => navigation.navigate("Menu")}
-
-          >
-            <Image
-              source={BurgerIcon}
-              style={{
-                width: 28,
-                height: 28,
-                resizeMode: "contain",
-              }}
-            />
-          </TouchableOpacity>
-
         </View>
 
         {/* TOP CARDS */}
@@ -205,17 +189,6 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "700",
     color: "#1D5B4F",
-  },
-
-  menuIcon: {
-    width: 30,
-    justifyContent: "space-between",
-    height: 22,
-  },
-  menuLine: {
-    height: 4,
-    backgroundColor: "#3A4743",
-    borderRadius: 3,
   },
 
   /* CARDS */
@@ -345,6 +318,6 @@ const styles = StyleSheet.create({
     width: 22,
     height: 22,
     marginRight: 12,
-    tintColor: "white", // ensures monochrome white icons
+    tintColor: "white",
   },
 });
