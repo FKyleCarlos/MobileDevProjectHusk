@@ -1,43 +1,37 @@
 import React, { useState } from "react";
-import {View,Text,TextInput,StyleSheet,TouchableOpacity,ScrollView,} from "react-native";
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
 import JournalHeader from "../components/JournalHeader";
-import { saveJournalEntry } from "../utils/storage";
-import { getUser } from "../utils/auth";
+import { updateJournalEntry } from "../utils/storage";
 
-export default function AddJournalScreen({ navigation }) {
-  const [title, setTitle] = useState("");
-  const [subtitle, setSubtitle] = useState("");
-  const [content, setContent] = useState("");
+export default function EditJournalScreen({ route, navigation }) {
+  const { entry } = route.params;
 
+  const [title, setTitle] = useState(entry.title);
+  const [subtitle, setSubtitle] = useState(entry.subtitle);
+  const [content, setContent] = useState(entry.content);
 
+  const handleSaveChanges = async () => {
+    const updated = {
+      ...entry,
+      title,
+      subtitle,
+      content,
+      preview: content.substring(0, 120) + "...",
+    };
 
-  const handleSave = async () => {
-  const user = await getUser(); // get logged in user
-
-  const newEntry = {
-    id: Date.now().toString(),
-    title,
-    subtitle,
-    content,
-    preview: content.substring(0, 120) + "...",
-    datetime: new Date().toLocaleString(),
+    await updateJournalEntry(updated);
+    navigation.goBack();
   };
-
-  await saveJournalEntry(user.email, newEntry);
-  navigation.goBack();
-};
-
 
   return (
     <View style={{ flex: 1 }}>
-      <JournalHeader navigation={navigation} titleOverride="New Entry" />
+      <JournalHeader navigation={navigation} titleOverride="Edit Entry" />
 
       <ScrollView contentContainerStyle={styles.container}>
-
+        
         <Text style={styles.label}>Title</Text>
         <TextInput
           style={styles.input}
-          placeholder="Enter a title..."
           value={title}
           onChangeText={setTitle}
         />
@@ -45,7 +39,6 @@ export default function AddJournalScreen({ navigation }) {
         <Text style={styles.label}>Subtitle</Text>
         <TextInput
           style={styles.input}
-          placeholder="Ex. Banff Trip Day!"
           value={subtitle}
           onChangeText={setSubtitle}
         />
@@ -53,14 +46,13 @@ export default function AddJournalScreen({ navigation }) {
         <Text style={styles.label}>Journal Content</Text>
         <TextInput
           style={[styles.input, styles.contentInput]}
-          placeholder="Write your journal entry here..."
+          multiline
           value={content}
           onChangeText={setContent}
-          multiline
         />
 
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Text style={styles.saveText}>Save Entry</Text>
+        <TouchableOpacity style={styles.saveButton} onPress={handleSaveChanges}>
+          <Text style={styles.saveText}>Save Changes</Text>
         </TouchableOpacity>
 
       </ScrollView>
@@ -69,14 +61,8 @@ export default function AddJournalScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 15,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 6,
-  },
+  container: { padding: 15 },
+  label: { fontSize: 16, fontWeight: "600", marginBottom: 6 },
   input: {
     backgroundColor: "#fff",
     borderRadius: 8,

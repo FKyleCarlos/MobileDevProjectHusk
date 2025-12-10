@@ -1,14 +1,5 @@
 import React from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Image,
-  StyleSheet,
-  SafeAreaView,
-  StatusBar,
-  Platform,
-} from "react-native";
+import {View,Text,TouchableOpacity,Image,StyleSheet,SafeAreaView,StatusBar,Platform,} from "react-native";
 import backIcon from "../assets/navIcons/back.png";
 
 export default function JournalHeader({ navigation, titleOverride, forceBackTo }) {
