@@ -13,9 +13,12 @@ import ScheduleScreen from './src/screens/ScheduleScreen.jsx';
 import JournalScreen from './src/screens/JournalScreen.jsx';
 import ProfileScreen from './src/screens/ProfileScreen.jsx';
 import AddClass from './src/screens/AddClassScreen.jsx';
-import addDeadline from './src/screens/AddDeadlineScreen.jsx'
-import LoginScreen from "./src/screens/LoginScreen";
-import SignupScreen from "./src/screens/SignupScreen";
+import addDeadline from './src/screens/AddDeadlineScreen.jsx';
+import SignupScreen from './src/screens/SignupScreen.jsx';
+import LoginScreen from './src/screens/LoginScreen.jsx';
+import AddJournal from './src/screens/AddJournal.jsx';
+import EditJournal from './src/screens/EditJournal.jsx'
+
 
 const Stack = createNativeStackNavigator();
 
@@ -43,7 +46,8 @@ function App() {
         <Stack.Screen name="Profile" component={ProfileScreen} options={{ headerShown: false }}/>
         <Stack.Screen name="Add Schedule" component={AddClass}/>
         <Stack.Screen name="Add Deadline" component={addDeadline}/>
-
+        <Stack.Screen name="AddJournal" component={AddJournal} options={{ headerShown: false }}/>
+        <Stack.Screen name="EditJournal" component={EditJournal} options={{ headerShown: false }}/>
 
       </Stack.Navigator>
     </NavigationContainer>
