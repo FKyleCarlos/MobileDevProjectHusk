@@ -5,6 +5,7 @@ import NavBar from '../components/NavBar';
 import CalendarButton from '../components/CalendarContainers';
 import addIcon from '../assets/miscIcons/add.png'
 
+
 export default function ScheduleScreen({ navigation }) {
   const [selectedTab, setSelectedTab] = useState('classes');
   const [selectedMonth, setSelectedMonth] = useState(0);

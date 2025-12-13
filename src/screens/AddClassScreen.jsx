@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function AddClassScreen() {
 
@@ -47,9 +48,14 @@ export default function AddClassScreen() {
     timeEnd: ""
     });
 
-  function saveData(){
-    alert(JSON.stringify(saveSchema, null, 2));
-  }
+    async function saveData() {
+        try {
+            await AsyncStorage.setItem('classes', JSON.stringify(saveSchema));
+            alert('Saved!');
+        } catch (error) {
+            alert(error);
+        }
+    }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
