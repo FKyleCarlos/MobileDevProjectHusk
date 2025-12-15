@@ -1,112 +1,85 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Save a new class
-export const saveClass = async (newClass) => {
-  try {
-    const existing = await AsyncStorage.getItem("classes");
-    const classes = existing ? JSON.parse(existing) : [];
-    const updated = [...classes, newClass];
-    await AsyncStorage.setItem("classes", JSON.stringify(updated));
-    return updated;
-  } catch (err) {
-    console.log("Error saving class:", err);
-  }
-};
+// Key used to store the classes array in AsyncStorage
+const CLASSES_KEY = 'myClasses'; 
+const DEADLINES_KEY = 'myDeadlines';
 
-// Save a new assignment
-export const saveAssignment = async (newAssignment) => {
+/**
+ * Retrieves all saved classes from AsyncStorage.
+ * @returns {Promise<Array>} An array of class objects, or an empty array if none exist.
+ */
+export async function getClasses() {
   try {
-    const existing = await AsyncStorage.getItem("assignments");
-    const assignments = existing ? JSON.parse(existing) : [];
-    const updated = [...assignments, newAssignment];
-    await AsyncStorage.setItem("assignments", JSON.stringify(updated));
-    return updated;
-  } catch (err) {
-    console.log("Error saving assignment:", err);
-  }
-};
-
-// Load ALL classes
-export const loadClasses = async () => {
-  try {
-    const existing = await AsyncStorage.getItem("classes");
-    return existing ? JSON.parse(existing) : [];
-  } catch (err) {
-    console.log("Error loading classes:", err);
+    const classesJson = await AsyncStorage.getItem(CLASSES_KEY);
+    // Return the parsed array, or an empty array if the key doesn't exist
+    return classesJson ? JSON.parse(classesJson) : [];
+  } catch (error) {
+    console.error('Error fetching classes:', error);
     return [];
   }
-};
+}
 
-// Load ALL assignments
-export const loadAssignments = async () => {
+/**
+ * Saves a new class object to AsyncStorage.
+ * @param {object} newClass - The class object to save (e.g., from AddClassScreen).
+ */
+export async function saveClass(newClass) {
   try {
-    const existing = await AsyncStorage.getItem("assignments");
-    return existing ? JSON.parse(existing) : [];
-  } catch (err) {
-    console.log("Error loading assignments:", err);
-    return [];
+    // 1. Get the existing list of classes
+    const existingClasses = await getClasses();
+
+    // 2. Add the new class
+    const updatedClasses = [...existingClasses, newClass];
+
+    // 3. Save the updated list back to storage
+    await AsyncStorage.setItem(CLASSES_KEY, JSON.stringify(updatedClasses));
+    console.log('Class saved successfully:', newClass.className);
+  } catch (error) {
+    console.error('Error saving class:', error);
+    alert("Failed to save class. Please try again.");
   }
-};
+}
 
+/**
+ * OPTIONAL: Clears all saved classes. Useful for development/testing.
+ */
+export async function clearClasses() {
+    try {
+        await AsyncStorage.removeItem(CLASSES_KEY);
+        console.log('All classes cleared successfully.');
+    } catch (error) {
+        console.error('Error clearing classes:', error);
+    }
+}
 
-// Journals //
-// Helper to generate a per-user storage key
-const journalKey = (email) => `journalEntries_${email}`;
+// You can also add utilities for deadlines here:
 
-// Load all journal entries for a specific user
-export const loadJournalEntries = async (email) => {
-  try {
-    const existing = await AsyncStorage.getItem(journalKey(email));
-    return existing ? JSON.parse(existing) : [];
-  } catch (err) {
-    console.log("Error loading journal entries:", err);
-    return [];
-  }
-};
+/**
+ * Retrieves all saved deadlines/assignments.
+ */
+export async function getDeadlines() {
+    try {
+        const deadlinesJson = await AsyncStorage.getItem(DEADLINES_KEY);
+        return deadlinesJson ? JSON.parse(deadlinesJson) : [];
+    } catch (error) {
+        console.error('Error fetching deadlines:', error);
+        return [];
+    }
+}
 
-// Save a new journal entry for the user
-export const saveJournalEntry = async (email, entry) => {
-  try {
-    const existing = await loadJournalEntries(email);
-    const updated = [...existing, entry];
+/**
+ * Saves a new deadline/assignment object.
+ */
+export async function saveDeadline(newDeadline) {
+    try {
+        const existingDeadlinesJson = await AsyncStorage.getItem(DEADLINES_KEY);
+        const existingDeadlines = existingDeadlinesJson ? JSON.parse(existingDeadlinesJson) : [];
 
-    await AsyncStorage.setItem(journalKey(email), JSON.stringify(updated));
-    return updated;
-  } catch (err) {
-    console.log("Error saving journal entry:", err);
-  }
-};
-
-// Update a journal entry
-export const updateJournalEntry = async (email, updatedEntry) => {
-  try {
-    const existing = await loadJournalEntries(email);
-
-    const newList = existing.map((entry) =>
-      entry.id === updatedEntry.id ? updatedEntry : entry
-    );
-
-    await AsyncStorage.setItem(journalKey(email), JSON.stringify(newList));
-    return newList;
-  } catch (err) {
-    console.log("Error updating journal entry:", err);
-  }
-};
-
-// Delete a journal entry
-export const deleteJournalEntry = async (email, id) => {
-  try {
-    const existing = await loadJournalEntries(email);
-
-    const newList = existing.filter((entry) => entry.id !== id);
-
-    await AsyncStorage.setItem(journalKey(email), JSON.stringify(newList));
-    return newList;
-  } catch (err) {
-    console.log("Error deleting journal entry:", err);
-  }
-};
-
-
-
-
+        const updatedDeadlines = [...existingDeadlines, newDeadline];
+        await AsyncStorage.setItem(DEADLINES_KEY, JSON.stringify(updatedDeadlines));
+        console.log('Deadline saved successfully:', newDeadline.className);
+    } catch (error) {
+        console.error('Error saving deadline:', error);
+        alert("Failed to save deadline. Please try again.");
+    }
+}
