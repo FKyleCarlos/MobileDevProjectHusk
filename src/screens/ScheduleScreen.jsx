@@ -8,25 +8,18 @@ import addIcon from '../assets/miscIcons/add.png';
 // Import Deadline functions
 import { getClasses, getDeadlines } from '../utils/storage'; 
 
-// Mock Data for class display (Now only used for fixed colors)
 const CLASS_DETAILS = {
-  // Use unique colors for different class names
   'Web Development': { color: '#ff6f61' },
   'Database Programming': { color: '#8a2be2' },
   'Mobile Development': { color: '#1e90ff' },
-  'Object Oriented Programming': { color: '#FFD700' }, // Added OOP color for assignments
-  // Add more default colors here as needed
+  'Object Oriented Programming': { color: '#FFD700' }, 
 };
 
-// Helper to convert 'HH:MM' time string to a comparable integer (e.g., '08:00' -> 8, '13:00' -> 13)
 const getHourFromTime = (time) => parseInt(time.split(':')[0]);
 
-// Component to display a single class block in the schedule
 const ClassBlock = ({ classData }) => {
-  // Get the color based on the class name, default to a gray if not found
   const colorDetail = CLASS_DETAILS[classData.className] || { color: '#777' };
 
-  // Use the saved location and instructor, with fallbacks
   const instructorDisplay = classData.instructor || 'Instructor Not Set';
   const locationDisplay = classData.location || 'Location Not Set';
 
@@ -48,7 +41,6 @@ const ClassBlock = ({ classData }) => {
   );
 };
 
-// --- NEW Deadline Block Component ---
 const DeadlineBlock = ({ deadlineData }) => {
     const colorDetail = CLASS_DETAILS[deadlineData.className] || { color: '#777' };
 
@@ -69,7 +61,6 @@ const DeadlineBlock = ({ deadlineData }) => {
         </TouchableOpacity>
     );
 };
-// ------------------------------------
 
 
 export default function ScheduleScreen({ navigation }) {
@@ -117,11 +108,9 @@ export default function ScheduleScreen({ navigation }) {
     }
   }, []);
 
-  // Use `useFocusEffect` to refetch classes whenever the screen comes into focus
   useFocusEffect(
     useCallback(() => {
       fetchData();
-      // Only set initial selected day/month on mount if they haven't been set
       if (days.length === 0) {
         setSelectedMonth(new Date().getMonth());
         setSelectedDayIndex(new Date().getDate() - 1);
@@ -155,23 +144,18 @@ export default function ScheduleScreen({ navigation }) {
   useEffect(() => {
     const selectedMonthData = months[selectedMonth];
     const daysArray = [];
-    
-    // FIX: Get the year from the current selected month for accurate date construction
+   
     const dateContext = new Date();
-    // If the selected month is past the current month in the current year, assume next year
-    const currentYear = dateContext.getFullYear();
-    const yearToUse = selectedMonth < dateContext.getMonth() ? currentYear + 1 : currentYear;
+    const yearToUse = new Date().getFullYear();
 
 
     for (let i = 1; i <= selectedMonthData.days; i++) {
-      // Use yearToUse here for accurate day of the week (e.g., February 29th)
       const date = new Date(yearToUse, selectedMonth, i); 
       const weekday = date.toLocaleString('en-us', { weekday: 'short' });
       daysArray.push({ number: i, word: weekday });
     }
 
     setDays(daysArray);
-    // If the new month doesn't have the previously selected day, default to the last day of the new month
     if (selectedDayIndex >= selectedMonthData.days) {
         setSelectedDayIndex(selectedMonthData.days - 1);
     }
@@ -179,26 +163,21 @@ export default function ScheduleScreen({ navigation }) {
 
 
   // ---------------------------
-  // Schedule Rendering Logic (Unchanged)
+  // Schedule Rendering Logic
   // ---------------------------
   const renderSchedule = () => {
-    // Get the abbreviated weekday name for the selected day (e.g., 'Tue')
-    // NOTE: The saved days are 'Mon', 'Tue', etc.
     const dayWord = days[selectedDayIndex]?.word || ''; 
 
-    // Filter classes that occur on the selected day
     const filteredClasses = classes
       .filter(cls => cls.classDays.includes(dayWord))
       .sort((a, b) => getHourFromTime(a.startTime) - getHourFromTime(b.startTime));
 
     return times.map((time, index) => {
-      // Convert time slot string (e.g., '8 AM') to 24-hour format integer (e.g., 8, 13)
       const hourString = time.replace(/ (AM|PM)/, '');
       let hour24 = parseInt(hourString);
       if (time.includes('PM') && hour24 !== 12) hour24 += 12;
-      if (time.includes('AM') && hour24 === 12) hour24 = 0; // Midnight case if supported
+      if (time.includes('AM') && hour24 === 12) hour24 = 0;
 
-      // Find classes that start in this time slot
       const classesInSlot = filteredClasses.filter(
         (cls) => getHourFromTime(cls.startTime) === hour24
       );
@@ -228,32 +207,24 @@ export default function ScheduleScreen({ navigation }) {
   };
 
 
-// --- NEW Assignment Rendering Logic (FIXED) ---
   const renderAssignments = () => {
-    // Get the selected day's number
+
     const day = days[selectedDayIndex]?.number;
-    const month = selectedMonth + 1; // Month is 0-indexed (+1 for display)
+    const month = selectedMonth + 1;
     
-    // FIX: Reconstruct the date object to correctly determine the year being viewed
-    // This ensures the year matches the one used when generating the `days` array.
     const dateContext = new Date();
     const currentYear = dateContext.getFullYear();
-    // If the selected month is past the current month, assume next year (matches useEffect logic)
     const yearToUse = selectedMonth < dateContext.getMonth() ? currentYear + 1 : currentYear; 
-
-    // Format target date as MM/DD/YYYY to match saved date format
     const targetDate = `${String(month).padStart(2, '0')}/${String(day).padStart(2, '0')}/${yearToUse}`;
-    console.log("Target Date for filtering:", targetDate); // Check this in your logs
+    console.log("Target Date for filtering:", targetDate);
 
     const filteredDeadlines = deadlines
         .filter(dl => dl.deadlineDate === targetDate)
         .sort((a, b) => {
-            // Sort by time first
             const timeA = a.deadlineTime;
             const timeB = b.deadlineTime;
             if (timeA < timeB) return -1;
             if (timeA > timeB) return 1;
-            // If times are equal, sort by class name
             if (a.className < b.className) return -1;
             if (a.className > b.className) return 1;
             return 0;
@@ -265,7 +236,6 @@ export default function ScheduleScreen({ navigation }) {
         );
     }
 
-    // Render the DeadlineBlocks
     return (
         <View style={styles.assignmentListContainer}>
             {filteredDeadlines.map((dl) => (
@@ -274,8 +244,6 @@ export default function ScheduleScreen({ navigation }) {
         </View>
     );
   };
-// ----------------------------------------
-
 
   return (
     <MainLayout>
@@ -316,10 +284,6 @@ export default function ScheduleScreen({ navigation }) {
         </View>
       )}
 
-        <Text style={styles.selectedDayLabel}>
-            {days[selectedDayIndex]?.word} {days[selectedDayIndex]?.number}
-        </Text>
-
         <ScrollView horizontal style={styles.scrollContainer} contentContainerStyle={styles.scrollContent}>
           {days.map((day, index) => (
               <CalendarButton 
@@ -332,14 +296,12 @@ export default function ScheduleScreen({ navigation }) {
           ))}
         </ScrollView>
       </View>
-      
 
       <ScrollView style={styles.scheduleContainer}>
         {selectedTab === 'classes' ? renderSchedule() : 
           renderAssignments()
         }
       </ScrollView>
-
         <TouchableOpacity 
           style={styles.fabContainer}
           onPress={() => {
@@ -408,7 +370,7 @@ const styles = StyleSheet.create({
   },
   dropdown: {
     position: 'absolute',
-    top: 150, // Adjusted position to be below the month text
+    top: 150,
     backgroundColor: '#fff',
     borderRadius: 8,
     width: 200,
@@ -416,7 +378,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 5,
     elevation: 5,
-    zIndex: 10, // Ensure dropdown is on top
+    zIndex: 10,
   },
   option: {
     padding: 10,
@@ -427,7 +389,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
   },
-  // Selected Day Label
   selectedDayLabel: {
     fontSize: 20,
     fontWeight: 'bold',
@@ -437,7 +398,6 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     paddingHorizontal: 20,
   },
-  // Calendar Scroll View
   scrollContainer: {
     paddingHorizontal: 5,
     height: 90, 
@@ -447,7 +407,6 @@ const styles = StyleSheet.create({
   scrollContent: {
     alignItems: 'center',
   },
-  // Schedule Grid Styles
   scheduleContainer: {
     flexGrow: 1,
     paddingHorizontal: 10,
@@ -458,15 +417,15 @@ const styles = StyleSheet.create({
   },
   timeRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start', // Align time and class block at the top
+    alignItems: 'flex-start',
     justifyContent: 'flex-start',
-    minHeight: 75, // Enough height for the class block
+    minHeight: 75,
   },
   timeText: {
-    width: 60, // Fixed width for the time label
+    width: 60,
     fontSize: 16,
     color: '#333',
-    paddingTop: 5, // Align time to the top of the row
+    paddingTop: 5,
   },
   currentTimeText: {
     color: '#ff6f61', 
@@ -476,9 +435,8 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: '#ddd',
     marginTop: 5,
-    marginLeft: 60, // Align separator with content
+    marginLeft: 60,
   },
-  // Class Block Styles
   classContent: {
     flex: 1, 
     flexDirection: 'column', 
@@ -517,7 +475,6 @@ const styles = StyleSheet.create({
   emptySlot: {
     minHeight: 1,
   },
-  // Assignment Styles
   assignmentListContainer: {
       paddingHorizontal: 10,
       paddingVertical: 10,
@@ -555,10 +512,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#999',
   },
-  // Floating Action Button
   fabContainer: {
     position: 'absolute',
-    bottom: 100, // Adjusted to be above the NavBar
+    bottom: 100,
     right: 30,
     width: 60,
     height: 60,

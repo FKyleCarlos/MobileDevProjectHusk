@@ -11,18 +11,30 @@ import {
 import MainLayout from "../layouts/MainLayout";
 import NavBar from "../components/NavBar";
 import { dummySchedules, dummyAssignments } from "../data/dummyData";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getUser } from "../utils/auth";
+import { useState, useEffect } from 'react';
 
-// PNG icons (update the path if needed)
 import InstagramIcon from "../assets/socialIcons/instagram.png";
 import FacebookIcon from "../assets/socialIcons/facebook.png";
 import TwitterIcon from "../assets/socialIcons/twitter.png";
 
 
 export default function HomeScreen({ navigation, route }) {
-  const user = route?.params?.user || { name: "Uvesh Ghanchi" };
+  const [user, setUser] = useState({ name: "User" });
   const { width } = useWindowDimensions();
-  const cardWidth = width * 0.28; // responsive card width
+  const cardWidth = width * 0.28;
+
+  useEffect(() => {
+    const loadUser = async () => {
+      const storedUser = await getUser();
+      if (storedUser) {
+        setUser(storedUser);
+      }
+    };
+
+    loadUser();
+  }, []);
+
 
   // --- TODAY LOGIC ---
   const today = new Date();
@@ -87,39 +99,26 @@ export default function HomeScreen({ navigation, route }) {
           </View>
         </View>
 
-        <TouchableOpacity
-          onPress={async () => {
-            await AsyncStorage.setItem("testKey", "Hello World");
-            alert("Saved!");
-          }}
-          style={{ padding: 20, backgroundColor: "green" }}
-        >
-          <Text style={{ color: "#fff" }}>Save Test</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={async () => {
-            const value = await AsyncStorage.getItem("testKey");
-            alert("Loaded: " + value);
-          }}
-          style={{ padding: 20, backgroundColor: "blue", marginTop: 10 }}
-        >
-          <Text style={{ color: "#fff" }}>Load Test</Text>
-        </TouchableOpacity>
-
         {/* TOP CARDS */}
         <View style={styles.cardContainer}>
           <View style={[styles.card, styles.cardAssignments, { width: cardWidth }]}>
-            <Text style={styles.cardText}>Assignments{"\n"}Due Today</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Classes & Assignments')}>
+              <Text style={styles.cardText}>Assignments{"\n"}Due Today</Text>
+            </TouchableOpacity>
           </View>
 
           <View style={[styles.card, styles.cardClasses, { width: cardWidth }]}>
-            <Text style={styles.cardText}>
-              Classes For{"\n"}{formattedDate}
-            </Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Classes & Assignments')}>
+              <Text style={styles.cardText}>
+                Classes For{"\n"}{formattedDate}
+              </Text>
+            </TouchableOpacity>
           </View>
 
           <View style={[styles.card, styles.cardJournal, { width: cardWidth }]}>
-            <Text style={styles.cardText}>Enter{"\n"}Journal{"\n"}Entry</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('AddJournal')}>
+              <Text style={styles.cardText}>Enter{"\n"}Journal{"\n"}Entry</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -145,10 +144,6 @@ export default function HomeScreen({ navigation, route }) {
             ))
           )}
 
-          {/* FAB BUTTON */}
-          <TouchableOpacity style={[styles.fab, { right: width * 0.04 }]}>
-            <Text style={styles.fabPlus}>+</Text>
-          </TouchableOpacity>
         </View>
 
         {/* FOOTER */}
@@ -191,6 +186,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: "5%",
     backgroundColor: "#F3F7EF",
     paddingBottom: 30,
+    paddingTop:20
   },
 
   /* HEADER */
@@ -306,7 +302,7 @@ const styles = StyleSheet.create({
   /* FOOTER */
   footer: {
     backgroundColor: "#1F2324",
-    marginTop: 25,
+    marginTop: 120,
     borderTopLeftRadius: 22,
     borderTopRightRadius: 22,
     padding: 20,
