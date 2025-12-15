@@ -1,0 +1,31 @@
+
+[
+  {
+    "id": 1,
+    "subject": "Object Oriented Programming",
+    "task": "Lab 3",
+    "dueTime": "13:00",
+    "date": "2025-02-07"
+  },
+  {
+    "id": 2,
+    "subject": "Mobile Development",
+    "task": "Assignment 1",
+    "dueTime": "14:00",
+    "date": "2025-02-07"
+  },
+  {
+    "id": 3,
+    "subject": "Database Programming",
+    "task": "Project 2",
+    "dueTime": "14:00",
+    "date": "2025-02-07"
+  },
+  {
+    "id": 4,
+    "subject": "Web Development",
+    "task": "Quiz 2",
+    "dueTime": "14:00",
+    "date": "2025-02-07"
+  }
+]
