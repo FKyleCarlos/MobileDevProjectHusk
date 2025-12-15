@@ -5,15 +5,17 @@ import MainLayout from '../layouts/MainLayout';
 import NavBar from '../components/NavBar';
 import CalendarButton from '../components/CalendarContainers'; 
 import addIcon from '../assets/miscIcons/add.png';
-import { getClasses } from '../utils/storage'; 
+// Import Deadline functions
+import { getClasses, getDeadlines } from '../utils/storage'; 
 
 // Mock Data for class display (Now only used for fixed colors)
 const CLASS_DETAILS = {
-  // Use unique colors for different class names
-  'Web Development': { color: '#ff6f61' },
-  'Database Programming': { color: '#8a2be2' },
-  'Mobile Development': { color: '#1e90ff' },
-  // Add more default colors here as needed
+  // Use unique colors for different class names
+  'Web Development': { color: '#ff6f61' },
+  'Database Programming': { color: '#8a2be2' },
+  'Mobile Development': { color: '#1e90ff' },
+  'Object Oriented Programming': { color: '#FFD700' }, // Added OOP color for assignments
+  // Add more default colors here as needed
 };
 
 // Helper to convert 'HH:MM' time string to a comparable integer (e.g., '08:00' -> 8, '13:00' -> 13)
@@ -21,30 +23,53 @@ const getHourFromTime = (time) => parseInt(time.split(':')[0]);
 
 // Component to display a single class block in the schedule
 const ClassBlock = ({ classData }) => {
-  // Get the color based on the class name, default to a gray if not found
-  const colorDetail = CLASS_DETAILS[classData.className] || { color: '#777' };
+  // Get the color based on the class name, default to a gray if not found
+  const colorDetail = CLASS_DETAILS[classData.className] || { color: '#777' };
 
-  // Use the saved location and instructor, with fallbacks
-  const instructorDisplay = classData.instructor || 'Instructor Not Set';
-  const locationDisplay = classData.location || 'Location Not Set';
+  // Use the saved location and instructor, with fallbacks
+  const instructorDisplay = classData.instructor || 'Instructor Not Set';
+  const locationDisplay = classData.location || 'Location Not Set';
 
-  return (
-    <TouchableOpacity 
-      style={[
-        styles.classBlock, 
-        { backgroundColor: colorDetail.color } 
-      ]}
-      onPress={() => Alert.alert(
-        classData.className, 
-        `Code: ${classData.classCode}\nInstructor: ${instructorDisplay}\nLocation: ${locationDisplay}\nTime: ${classData.startTime} - ${classData.endTime}\nDays: ${classData.classDays.join(', ')}`
-      )}
-    >
-      <Text style={styles.classTitle}>{classData.className}</Text>
-      <Text style={styles.classLocation}>{instructorDisplay} - {locationDisplay}</Text>
-      <Text style={styles.classTime}>{`${classData.startTime} - ${classData.endTime}`}</Text>
-    </TouchableOpacity>
-  );
+  return (
+    <TouchableOpacity 
+      style={[
+        styles.classBlock, 
+        { backgroundColor: colorDetail.color } 
+      ]}
+      onPress={() => Alert.alert(
+        classData.className, 
+        `Code: ${classData.classCode}\nInstructor: ${instructorDisplay}\nLocation: ${locationDisplay}\nTime: ${classData.startTime} - ${classData.endTime}\nDays: ${classData.classDays.join(', ')}`
+      )}
+    >
+      <Text style={styles.classTitle}>{classData.className}</Text>
+      <Text style={styles.classLocation}>{instructorDisplay} - {locationDisplay}</Text>
+      <Text style={styles.classTime}>{`${classData.startTime} - ${classData.endTime}`}</Text>
+    </TouchableOpacity>
+  );
 };
+
+// --- NEW Deadline Block Component ---
+const DeadlineBlock = ({ deadlineData }) => {
+    const colorDetail = CLASS_DETAILS[deadlineData.className] || { color: '#777' };
+
+    return (
+        <TouchableOpacity 
+            style={[
+                styles.deadlineBlock, 
+                { backgroundColor: colorDetail.color } 
+            ]}
+            onPress={() => Alert.alert(
+                `${deadlineData.assignmentName} (${deadlineData.className})`, 
+                `Due: ${deadlineData.deadlineDate} at ${deadlineData.deadlineTime}`
+            )}
+        >
+            <Text style={styles.deadlineClassTitle}>{deadlineData.className}</Text>
+            <Text style={styles.deadlineAssignmentName}>{deadlineData.assignmentName}</Text>
+            <Text style={styles.deadlineTime}>{deadlineData.deadlineTime}</Text>
+        </TouchableOpacity>
+    );
+};
+// ------------------------------------
 
 
 export default function ScheduleScreen({ navigation }) {
@@ -54,6 +79,7 @@ export default function ScheduleScreen({ navigation }) {
   const [days, setDays] = useState([]);
   const [selectedDayIndex, setSelectedDayIndex] = useState(new Date().getDate() - 1); 
   const [classes, setClasses] = useState([]); // State for all saved classes
+  const [deadlines, setDeadlines] = useState([]); // NEW state for deadlines
 
   const times = [
     '8 AM', '9 AM', '10 AM', '11 AM', '12 PM', '1 PM', '2 PM',
@@ -76,32 +102,35 @@ export default function ScheduleScreen({ navigation }) {
   ];
 
   // ---------------------------
-  // Data Fetching Logic
+  // Data Fetching Logic (Updated)
   // ---------------------------
-  const fetchClasses = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     try {
-        const savedClasses = await getClasses();
-        setClasses(savedClasses);
-        console.log('Fetched classes for display:', savedClasses.length, savedClasses);
-    } catch (e) {
-        console.error('Failed to fetch classes:', e);
-    }
+        const savedClasses = await getClasses();
+        setClasses(savedClasses);
+        
+        const savedDeadlines = await getDeadlines();
+        setDeadlines(savedDeadlines);
+
+    } catch (e) {
+        console.error('Failed to fetch data:', e);
+    }
   }, []);
 
   // Use `useFocusEffect` to refetch classes whenever the screen comes into focus
   useFocusEffect(
     useCallback(() => {
-      fetchClasses();
+      fetchData();
       // Only set initial selected day/month on mount if they haven't been set
       if (days.length === 0) {
         setSelectedMonth(new Date().getMonth());
         setSelectedDayIndex(new Date().getDate() - 1);
       }
-    }, [fetchClasses])
+    }, [fetchData])
   );
 
   // ---------------------------
-  // Handlers
+  // Handlers (Unchanged)
   // ---------------------------
   const handleTabSwitch = (tab) => {
     setSelectedTab(tab);
@@ -121,15 +150,22 @@ export default function ScheduleScreen({ navigation }) {
   };
 
   // ---------------------------
-  // Date Generation Effect
+  // Date Generation Effect (Unchanged)
   // ---------------------------
   useEffect(() => {
     const selectedMonthData = months[selectedMonth];
     const daysArray = [];
-    const currentYear = new Date().getFullYear();
+    
+    // FIX: Get the year from the current selected month for accurate date construction
+    const dateContext = new Date();
+    // If the selected month is past the current month in the current year, assume next year
+    const currentYear = dateContext.getFullYear();
+    const yearToUse = selectedMonth < dateContext.getMonth() ? currentYear + 1 : currentYear;
+
 
     for (let i = 1; i <= selectedMonthData.days; i++) {
-      const date = new Date(currentYear, selectedMonth, i);
+      // Use yearToUse here for accurate day of the week (e.g., February 29th)
+      const date = new Date(yearToUse, selectedMonth, i); 
       const weekday = date.toLocaleString('en-us', { weekday: 'short' });
       daysArray.push({ number: i, word: weekday });
     }
@@ -143,7 +179,7 @@ export default function ScheduleScreen({ navigation }) {
 
 
   // ---------------------------
-  // Schedule Rendering Logic
+  // Schedule Rendering Logic (Unchanged)
   // ---------------------------
   const renderSchedule = () => {
     // Get the abbreviated weekday name for the selected day (e.g., 'Tue')
@@ -177,12 +213,12 @@ export default function ScheduleScreen({ navigation }) {
             <Text style={[styles.timeText, isCurrentTimeSlot && styles.currentTimeText]}>{time}</Text>
             <View style={styles.classContent}>
               {classesInSlot.length > 0 ? (
-                classesInSlot.map((cls) => (
-                  <ClassBlock key={cls.id} classData={cls} />
-                ))
-              ) : (
-                <View style={styles.emptySlot} />
-              )}
+                classesInSlot.map((cls) => (
+                  <ClassBlock key={cls.id} classData={cls} />
+                ))
+              ) : (
+                <View style={styles.emptySlot} />
+              )}
             </View>
           </View>
           <View style={styles.separator} />
@@ -190,6 +226,55 @@ export default function ScheduleScreen({ navigation }) {
       );
     });
   };
+
+
+// --- NEW Assignment Rendering Logic (FIXED) ---
+  const renderAssignments = () => {
+    // Get the selected day's number
+    const day = days[selectedDayIndex]?.number;
+    const month = selectedMonth + 1; // Month is 0-indexed (+1 for display)
+    
+    // FIX: Reconstruct the date object to correctly determine the year being viewed
+    // This ensures the year matches the one used when generating the `days` array.
+    const dateContext = new Date();
+    const currentYear = dateContext.getFullYear();
+    // If the selected month is past the current month, assume next year (matches useEffect logic)
+    const yearToUse = selectedMonth < dateContext.getMonth() ? currentYear + 1 : currentYear; 
+
+    // Format target date as MM/DD/YYYY to match saved date format
+    const targetDate = `${String(month).padStart(2, '0')}/${String(day).padStart(2, '0')}/${yearToUse}`;
+    console.log("Target Date for filtering:", targetDate); // Check this in your logs
+
+    const filteredDeadlines = deadlines
+        .filter(dl => dl.deadlineDate === targetDate)
+        .sort((a, b) => {
+            // Sort by time first
+            const timeA = a.deadlineTime;
+            const timeB = b.deadlineTime;
+            if (timeA < timeB) return -1;
+            if (timeA > timeB) return 1;
+            // If times are equal, sort by class name
+            if (a.className < b.className) return -1;
+            if (a.className > b.className) return 1;
+            return 0;
+        });
+
+    if (filteredDeadlines.length === 0) {
+        return (
+            <Text style={styles.assignmentPlaceholder}>No deadlines scheduled for this day.</Text>
+        );
+    }
+
+    // Render the DeadlineBlocks
+    return (
+        <View style={styles.assignmentListContainer}>
+            {filteredDeadlines.map((dl) => (
+                <DeadlineBlock key={dl.id} deadlineData={dl} />
+            ))}
+        </View>
+    );
+  };
+// ----------------------------------------
 
 
   return (
@@ -231,12 +316,10 @@ export default function ScheduleScreen({ navigation }) {
         </View>
       )}
 
-        {/* Selected Day Label (e.g., Tuesday 7) */}
         <Text style={styles.selectedDayLabel}>
             {days[selectedDayIndex]?.word} {days[selectedDayIndex]?.number}
         </Text>
 
-        {/* Days Scroll View */}
         <ScrollView horizontal style={styles.scrollContainer} contentContainerStyle={styles.scrollContent}>
           {days.map((day, index) => (
               <CalendarButton 
@@ -251,15 +334,12 @@ export default function ScheduleScreen({ navigation }) {
       </View>
       
 
-      {/* Schedule/Assignments Content */}
       <ScrollView style={styles.scheduleContainer}>
         {selectedTab === 'classes' ? renderSchedule() : 
-          // Placeholder for assignments
-          <Text style={styles.assignmentPlaceholder}>Assignments will be displayed here.</Text>
-      }
+          renderAssignments()
+        }
       </ScrollView>
 
-        {/* Floating Action Button */}
         <TouchableOpacity 
           style={styles.fabContainer}
           onPress={() => {
@@ -312,7 +392,6 @@ const styles = StyleSheet.create({
     color: '#52796F',
     fontWeight: 'bold',
   },
-  // Month Dropdown Styles
   dropdownButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -399,7 +478,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
     marginLeft: 60, // Align separator with content
   },
-  // Class Block Styles (Matching Mockup)
+  // Class Block Styles
   classContent: {
     flex: 1, 
     flexDirection: 'column', 
@@ -435,9 +514,41 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 5,
   },
-  emptySlot: {
-    minHeight: 1,
-  },
+  emptySlot: {
+    minHeight: 1,
+  },
+  // Assignment Styles
+  assignmentListContainer: {
+      paddingHorizontal: 10,
+      paddingVertical: 10,
+  },
+  deadlineBlock: {
+    padding: 12,
+    borderRadius: 10,
+    marginVertical: 5, 
+    width: '100%', 
+    elevation: 3, 
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  deadlineClassTitle: {
+      color: '#fff',
+      fontWeight: 'bold',
+      fontSize: 18,
+      marginBottom: 2,
+  },
+  deadlineAssignmentName: {
+      color: '#fff',
+      fontSize: 16,
+      marginBottom: 5,
+  },
+  deadlineTime: {
+      color: '#fff',
+      fontSize: 14,
+      fontWeight: 'bold',
+  },
   assignmentPlaceholder: {
     textAlign: 'center',
     marginTop: 50,
